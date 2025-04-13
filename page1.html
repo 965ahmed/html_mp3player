@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MP3 Player</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Top Bar with Playback Status and File Loader -->
+  <div class="top-bar">
+    <div class="filename-display">No file playing</div>
+    <div class="total-time-display">Total: 0s</div>
+    <input type="file" id="fileLoader" accept="audio/mp3" multiple />
+    <button id="resetButton" onclick="resetAll()">Reset</button>
+  </div>
+
+  <div class="player-grid">
+    <div class="button-group" id="groupA"></div>
+    <div class="button-group" id="groupB"></div>
+    <div class="button-group" id="groupC"></div>
+    <div class="right-controls">
+      <button id="playAll" class="control-btn">Play All</button>
+      <button id="forward" class="control-btn">Forward</button>
+      <button id="home" class="control-btn">Home</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
