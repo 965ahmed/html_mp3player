@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Audio Sections</title>
+  <title>Audio pages</title>
   <style>
     * {
       margin: 0;
@@ -22,11 +22,12 @@
     }
     
     .grid-container {
-      height: 100vh;
+      height: calc(100vh - 60px); /* Account for Android navigation bar */
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       grid-template-rows: repeat(20, 1fr);
       gap: 1px;
+      padding-bottom: env(safe-area-inset-bottom); /* For modern Android phones */
     }
     
     .grid-btn {
@@ -69,17 +70,16 @@
       btn.className = 'grid-btn';
       btn.textContent = i;
       btn.onclick = () => {
-        window.location.href = `subpage${i}.html`;
+        window.location.href = `page${i}.html`;  // Changed to pageX.html
       };
       gridContainer.appendChild(btn);
     }
     
-    // Disable zooming
+    // Mobile optimizations
     document.addEventListener('touchmove', function(event) {
       if (event.scale !== 1) { event.preventDefault(); }
     }, { passive: false });
     
-    // Prevent double-tap zoom
     let lastTouchEnd = 0;
     document.addEventListener('touchend', function(event) {
       const now = (new Date()).getTime();
