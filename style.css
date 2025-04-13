@@ -1,4 +1,4 @@
-/* style.css - Merged version */
+/* style.css - Merged version with fixed MP3 player layout */
 
 /* Common Styles */
 * {
@@ -91,15 +91,17 @@ body {
 .mp3-player-grid {
   height: calc(100vh - 60px);
   display: grid;
-  grid-template-columns: repeat(3, 1fr) 100px;
+  grid-template-columns: repeat(4, 1fr); /* Changed to 4 equal columns */
   gap: 1px;
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Button groups - now fill their grid cells properly */
 .mp3-group {
   display: grid;
   grid-template-rows: repeat(10, 1fr);
   gap: 1px;
+  height: 100%;
 }
 
 .mp3-btn {
@@ -109,10 +111,12 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 4vw;
+  font-size: 24px; /* Changed from vw to fixed size for better control */
   cursor: pointer;
   transition: all 0.1s ease;
   -webkit-tap-highlight-color: transparent;
+  width: 100%;
+  height: 100%;
 }
 
 .mp3-btn:active {
@@ -131,11 +135,12 @@ body {
   opacity: 0.7;
 }
 
-/* Right controls */
+/* Right controls - take full height of their column */
 .mp3-right-controls {
   display: grid;
   grid-template-rows: repeat(3, 1fr);
   gap: 1px;
+  height: 100%;
 }
 
 .mp3-control-btn {
@@ -145,10 +150,12 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 4vw;
+  font-size: 18px; /* Fixed size for control buttons */
   cursor: pointer;
   transition: all 0.1s ease;
   -webkit-tap-highlight-color: transparent;
+  width: 100%;
+  height: 100%;
 }
 
 .mp3-control-btn:active {
@@ -181,4 +188,23 @@ body {
   background-color: #2d2d2d;
   border: none;
   cursor: pointer;
+}
+
+/* Ensure buttons maintain aspect ratio */
+@media (orientation: portrait) {
+  .mp3-btn {
+    font-size: 16px; /* Smaller font in portrait */
+  }
+  .mp3-control-btn {
+    font-size: 14px; /* Smaller font in portrait */
+  }
+}
+
+@media (orientation: landscape) {
+  .mp3-btn {
+    font-size: 24px; /* Larger font in landscape */
+  }
+  .mp3-control-btn {
+    font-size: 18px; /* Larger font in landscape */
+  }
   }
