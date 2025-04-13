@@ -3,135 +3,157 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Main Page</title>
+  <title>MP3 Player Hub</title>
   <style>
-    /* Global Styles */
-    html, body {
+    /* Global Reset */
+    * {
       margin: 0;
       padding: 0;
-      height: 100%;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      background-color: #121212;
-      color: white;
-      overflow: auto; /* Allow scrolling if needed */
-    }
-    h1 {
-      text-align: center;
-      margin: 20px 0;
-      font-size: 2.5em;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    }
-    
-    /* Main Container */
-    #main-container {
-      flex: 1;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-      padding: 20px;
       box-sizing: border-box;
     }
     
-    /* Subpage Buttons */
-    .subpage-btn {
-      font-size: 1.5em;
-      padding: 30px 20px;
-      border: none;
-      border-radius: 8px;
-      background-color: #673ab7;
+    /* Full-screen Layout */
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
       color: white;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-      cursor: pointer;
-      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    /* Header */
+    header {
+      height: 60px;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      min-height: 120px;
+      align-items: center;
+      background-color: #1a1a1a;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
     }
     
-    .subpage-btn:hover {
-      background-color: #512da8;
-      transform: translateY(-3px);
+    h1 {
+      font-size: 1.5rem;
+      text-align: center;
     }
     
-    .subpage-btn:active {
+    /* Main Grid Container */
+    .grid-container {
+      height: calc(100% - 60px);
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(10, 1fr);
+      gap: 2px;
+      padding: 2px;
+      overflow: hidden;
+    }
+    
+    /* Button Styles */
+    .grid-btn {
+      background-color: #2d2d2d;
+      border: none;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-radius: 2px;
+    }
+    
+    .grid-btn:hover {
+      background-color: #673ab7;
+      transform: scale(1.02);
+      z-index: 1;
+      box-shadow: 0 0 10px rgba(103, 58, 183, 0.7);
+    }
+    
+    .grid-btn:active {
       transform: scale(0.98);
     }
     
-    .subpage-btn small {
-      font-size: 0.7em;
-      opacity: 0.8;
-      margin-top: 8px;
+    /* Color Variations */
+    .grid-btn:nth-child(10n+1) { background-color: #2e7d32; }
+    .grid-btn:nth-child(10n+2) { background-color: #1565c0; }
+    .grid-btn:nth-child(10n+3) { background-color: #d84315; }
+    .grid-btn:nth-child(10n+4) { background-color: #6a1b9a; }
+    .grid-btn:nth-child(10n+5) { background-color: #00838f; }
+    .grid-btn:nth-child(10n+6) { background-color: #ef6c00; }
+    .grid-btn:nth-child(10n+7) { background-color: #4e342e; }
+    .grid-btn:nth-child(10n+8) { background-color: #37474f; }
+    .grid-btn:nth-child(10n+9) { background-color: #5d4037; }
+    .grid-btn:nth-child(10n+10) { background-color: #4527a0; }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 1200px) {
+      .grid-container {
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(20, 1fr);
+      }
     }
     
-    /* Different colors for different subpages */
-    .subpage-btn:nth-child(1) { background-color: #2e7d32; }
-    .subpage-btn:nth-child(2) { background-color: #1565c0; }
-    .subpage-btn:nth-child(3) { background-color: #d84315; }
-    .subpage-btn:nth-child(4) { background-color: #6a1b9a; }
-    .subpage-btn:nth-child(5) { background-color: #00838f; }
-    .subpage-btn:nth-child(6) { background-color: #ef6c00; }
-    .subpage-btn:nth-child(7) { background-color: #4e342e; }
-    .subpage-btn:nth-child(8) { background-color: #37474f; }
-    .subpage-btn:nth-child(9) { background-color: #5d4037; }
-    .subpage-btn:nth-child(10) { background-color: #4527a0; }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      #main-container {
-        grid-template-columns: 1fr;
+    @media (max-width: 600px) {
+      .grid-container {
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(25, 1fr);
       }
-      .subpage-btn {
-        padding: 25px 15px;
+      .grid-btn {
+        font-size: 0.8rem;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Main Title -->
-  <h1>MP3 Player Collection</h1>
-
-  <!-- Main Container with Subpage Buttons -->
-  <div id="main-container">
-    <!-- Subpage Buttons 1-10 -->
-    <button class="subpage-btn" onclick="window.location.href='subpage1.html'">
-      Subpage 1 <small>Basic Player</small>
-    </button>
-    <button class="subpage-btn" onclick="window.location.href='subpage2.html'">
-      Subpage 2 <small>Advanced Controls</small>
-    </button>
-    <button class="subpage-btn" onclick="window.location.href='subpage3.html'">
-      Subpage 3 <small>Playlist Manager</small>
-    </button>
-    <button class="subpage-btn" onclick="window.location.href='subpage4.html'">
-      Subpage 4 <small>Category A</small>
-    </button>
-    <button class="subpage-btn" onclick="window.location.href='subpage5.html'">
-      Subpage 5 <small>Category B</small>
-    </button>
-    <button class="subpage-btn" onclick="window.location.href='subpage6.html'">
-      Subpage 6 <small>Category C</small>
-    </button>
-    <button class="subpage-btn" onclick="window.location.href='subpage7.html'">
-      Subpage 7 <small>Special Effects</small>
-    </button>
-    <button class="subpage-btn" onclick="window.location.href='subpage8.html'">
-      Subpage 8 <small>Recordings</small>
-    </button>
-    <button class="subpage-btn" onclick="window.location.href='subpage9.html'">
-      Subpage 9 <small>Favorites</small>
-    </button>
-    <button class="subpage-btn" onclick="window.location.href='subpage10.html'">
-      Subpage 10 <small>Custom Mix</small>
-    </button>
+  <header>
+    <h1>MP3 Player Sections</h1>
+  </header>
+  
+  <div class="grid-container" id="gridContainer">
+    <!-- Buttons will be generated by JavaScript -->
   </div>
 
-  <!-- Optional Footer -->
-  <footer style="text-align: center; padding: 15px; font-size: 0.9em; opacity: 0.7;">
-    MP3 Player App © 2023 | Select a player above
-  </footer>
+  <script>
+    // Generate 100 buttons
+    const gridContainer = document.getElementById('gridContainer');
+    
+    for (let i = 1; i <= 100; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'grid-btn';
+      btn.textContent = `Part ${i}`;
+      btn.onclick = () => {
+        window.location.href = `subpage${i}.html`;
+      };
+      
+      // Add touch feedback for mobile
+      btn.addEventListener('touchstart', () => {
+        btn.style.transform = 'scale(0.98)';
+      });
+      btn.addEventListener('touchend', () => {
+        btn.style.transform = '';
+      });
+      
+      gridContainer.appendChild(btn);
+    }
+    
+    // Add keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      const buttons = document.querySelectorAll('.grid-btn');
+      const currentFocus = document.activeElement;
+      let index = Array.from(buttons).indexOf(currentFocus);
+      
+      if (e.key === 'ArrowRight' && index < buttons.length - 1) {
+        buttons[index + 1].focus();
+      } else if (e.key === 'ArrowLeft' && index > 0) {
+        buttons[index - 1].focus();
+      } else if (e.key === 'ArrowDown' && index + 10 < buttons.length) {
+        buttons[index + 10].focus();
+      } else if (e.key === 'ArrowUp' && index - 10 >= 0) {
+        buttons[index - 10].focus();
+      } else if (e.key === 'Enter' && currentFocus.classList.contains('grid-btn')) {
+        currentFocus.click();
+      }
+    });
+  </script>
 </body>
 </html>
