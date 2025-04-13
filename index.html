@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Main Page</title>
+  <style>
+    /* Global Styles */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      background-color: #121212; /* Dark background */
+      color: white; /* Default text color */
+      overflow: hidden; /* Prevent scrolling */
+    }
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 3em; /* Larger title */
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Add shadow for better visibility */
+    }
+    #main-container {
+      flex: 1;
+      display: flex;
+      justify-content: center; /* Center horizontally */
+      align-items: center; /* Center vertically */
+    }
+    #open-subpage {
+      font-size: 2em; /* Large button text */
+      padding: 20px 40px;
+      border: none;
+      border-radius: 8px;
+      background-color: #673ab7; /* Deep purple */
+      color: white; /* White text */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      transition: background-color 0.3s ease; /* Smooth hover effect */
+    }
+    #open-subpage:hover {
+      background-color: #512da8; /* Slightly darker purple on hover */
+    }
+    #open-subpage:active {
+      transform: scale(0.98); /* Slight shrink effect when clicked */
+    }
+  </style>
+</head>
+<body>
+  <!-- Main Title -->
+  <h1>Welcome to the MP3 Player App</h1>
+
+  <!-- Main Container -->
+  <div id="main-container">
+    <!-- Button to Open Subpage -->
+    <button id="open-subpage">Open Subpage</button>
+  </div>
+
+  <!-- JavaScript to Handle Button Click -->
+  <script>
+    // Add an event listener to the button to open the subpage
+    document.getElementById('open-subpage').addEventListener('click', () => {
+      // Redirect to the subpage
+      window.location.href = 'subpage.html';
+    });
+  </script>
+</body>
+</html>
