@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IndexedDB MP3 Player</title>
+  <title>MP3 Player</title>
   <style>
     /* Global Styles */
     html, body {
@@ -16,12 +16,36 @@
       background-color: #121212;
       overflow: hidden;
     }
-    h1 {
+    
+    /* Playback Status Bar */
+    .playback-status {
       text-align: center;
       margin: 10px 0;
-      font-size: 2em;
-      color: #ffffff;
+      font-size: 1.2em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      padding: 10px;
+      background-color: #222;
+      border-radius: 8px;
+      margin: 10px 20px;
     }
+    
+    .total-time-display {
+      font-family: monospace;
+      min-width: 120px;
+      color: #4fc3f7; /* Bright blue */
+    }
+
+    .filename-display {
+      flex-grow: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #81c784; /* Bright green */
+    }
+
     #fileLoader {
       margin: 10px auto;
       display: block;
@@ -29,27 +53,28 @@
       padding: 10px;
       border-radius: 8px;
       background-color: #333;
-      color: #ffffff;
+      color: #ff8a65; /* Bright orange */
       cursor: pointer;
     }
+    
+    /* Main Grid Layout */
     #main {
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr 2fr;
+      grid-template-columns: 1fr 1fr 1fr 200px;
       gap: 10px;
       padding: 10px;
       box-sizing: border-box;
-      height: calc(100vh - 60px);
+      height: calc(100vh - 120px);
     }
 
-    /* Button Groups */
     .button-group {
       display: grid;
       grid-template-rows: repeat(10, 1fr);
       gap: 10px;
     }
 
-    /* Buttons */
+    /* Button Styles with Bright Text Colors */
     .button-group button {
       width: 100%;
       height: 100%;
@@ -64,7 +89,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      text-align: center;
     }
 
     /* Group Colors with Bright Text */
@@ -90,22 +114,21 @@
       display: flex;
       flex-direction: column;
       justify-content: space-evenly;
+      width: 200px;
     }
     .right-controls button {
-      height: 33%;
-      font-size: 2em;
+      height: 80px;
+      font-size: 1.8em;
       border: none;
       border-radius: 8px;
-      padding: 0;
+      margin: 5px 0;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-      position: relative;
-      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    /* Colors for Sidebar Buttons */
+    /* Sidebar Button Colors */
     #playAll { 
       background-color: #4527a0;
       color: #b39ddb; /* Light purple text */
@@ -118,19 +141,38 @@
       background-color: #5d4037; /* Brown background */
       color: #d7ccc8; /* Light brown text */
     }
+
+    .reset-container {
+      text-align: center;
+      padding: 10px;
+    }
+    #resetButton {
+      margin-top: 10px;
+      color: #ff5252; /* Bright red */
+      font-size: 1.2em;
+      padding: 8px 15px;
+      border-radius: 5px;
+      background-color: #333;
+      border: none;
+    }
+    
+    .button-container small {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <h1>IndexedDB MP3 Player</h1>
+  <!-- Playback Status Bar -->
+  <div class="playback-status">
+    <div class="filename-display">No file playing</div>
+    <div class="total-time-display">Total: 0s</div>
+  </div>
+
   <input type="file" id="fileLoader" accept="audio/mp3" multiple />
   <div id="main">
-    <!-- Column for Group A buttons -->
     <div class="button-group" id="groupA"></div>
-    <!-- Column for Group B buttons -->
     <div class="button-group" id="groupB"></div>
-    <!-- Column for Group C buttons -->
     <div class="button-group" id="groupC"></div>
-    <!-- Right sidebar controls -->
     <div class="right-controls">
       <button id="playAll">Play All</button>
       <button id="forward">Forward</button>
@@ -138,166 +180,288 @@
     </div>
   </div>
 
-  <script>
-    const fileLoader = document.getElementById('fileLoader');
-    const groupA = document.getElementById('groupA');
-    const groupB = document.getElementById('groupB');
-    const groupC = document.getElementById('groupC');
-    const playAllBtn = document.getElementById('playAll');
-    const forwardBtn = document.getElementById('forward');
-    const homeBtn = document.getElementById('home');
+  <div class="reset-container">
+    <button id="resetButton" onclick="resetAll()">Reset All Files & Settings</button>
+  </div>
 
-    // An array for 30 audio objects (indices 0 to 29)
-    const audios = Array(30).fill(null);
-    // Retrieve enabled/disabled states from localStorage
-    const enabled = JSON.parse(localStorage.getItem('mp3_enabled')) || Array(30).fill(true);
-    let currentAudio = null;
-    let currentIndex = 0;
-    let stopFlag = false;
+<script>
+  // DOM Elements
+  const fileLoader = document.getElementById('fileLoader');
+  const groupA = document.getElementById('groupA');
+  const groupB = document.getElementById('groupB');
+  const groupC = document.getElementById('groupC');
+  const playAllBtn = document.getElementById('playAll');
+  const forwardBtn = document.getElementById('forward');
+  const homeBtn = document.getElementById('home');
+  const filenameDisplay = document.querySelector('.filename-display');
+  const totalTimeDisplay = document.querySelector('.total-time-display');
 
-    /************ IndexedDB Setup ************/
-    let db;
-    const request = indexedDB.open('AudioDB', 1);
+  // Player State
+  const audios = Array(30).fill(null);
+  const fileNames = Array(30).fill('');
+  let enabled = JSON.parse(localStorage.getItem('mp3_enabled')) || Array(30).fill(true);
+  let currentAudio = null;
+  let currentIndex = 0;
+  let stopFlag = false;
+  let db;
+  let updateInterval;
+  let totalPlaylistTime = 0;
+  let elapsedTime = 0;
 
-    request.onerror = () => alert('IndexedDB error');
-    request.onsuccess = () => {
-      db = request.result;
-      loadStoredAudios();
-    };
-    request.onupgradeneeded = (event) => {
-      db = event.target.result;
-      db.createObjectStore('audios', { keyPath: 'index' });
-    };
+  // Initialize IndexedDB
+  const request = indexedDB.open('AudioDB', 1);
 
-    function saveToIndexedDB(index, file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const transaction = db.transaction(['audios'], 'readwrite');
-        const store = transaction.objectStore('audios');
-        store.put({ index, name: file.name, blob: reader.result });
-      };
-      reader.readAsArrayBuffer(file);
-    }
+  request.onerror = () => console.error('IndexedDB error'); // Silent error handling
+  request.onsuccess = () => {
+    db = request.result;
+    loadStoredAudios();
+  };
+  request.onupgradeneeded = (event) => {
+    db = event.target.result;
+    db.createObjectStore('audios', { keyPath: 'index' });
+  };
 
-    function loadStoredAudios() {
-      const transaction = db.transaction(['audios'], 'readonly');
+  function saveToIndexedDB(index, file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const transaction = db.transaction(['audios'], 'readwrite');
       const store = transaction.objectStore('audios');
-      const req = store.getAll();
-
-      req.onsuccess = () => {
-        req.result.forEach(data => {
-          const blob = new Blob([data.blob], { type: 'audio/mp3' });
-          audios[data.index] = new Audio(URL.createObjectURL(blob));
-        });
-        if (req.result.length > 0) {
-          alert('Restored ' + req.result.length + ' file(s) from storage.');
-        }
-      };
-    }
-
-    // File input onchange handler
-    fileLoader.onchange = (e) => {
-      const files = Array.from(e.target.files);
-      files.forEach((file, i) => {
-        const index = i;
-        audios[index] = new Audio(URL.createObjectURL(file));
-        saveToIndexedDB(index, file);
-      });
-      alert('Loaded and saved ' + files.length + ' file(s).');
+      store.put({ index, name: file.name, blob: reader.result });
     };
+    reader.readAsArrayBuffer(file);
+  }
 
-    // Create buttons
-    function createButtons() {
-      const groups = ['A', 'B', 'C'];
-      const groupContainers = [groupA, groupB, groupC];
+  function loadStoredAudios() {
+    const transaction = db.transaction(['audios'], 'readonly');
+    const store = transaction.objectStore('audios');
+    const req = store.getAll();
 
-      for (let i = 0; i < 10; i++) {
-        groups.forEach((prefix, col) => {
-          const index = i + col * 10;
-          const btn = document.createElement('button');
-          btn.textContent = `${prefix}${i + 1}`;
-          btn.dataset.index = index;
-          if (prefix === 'A') btn.classList.add('group-a');
-          if (prefix === 'B') btn.classList.add('group-b');
-          if (prefix === 'C') btn.classList.add('group-c');
-          if (!enabled[index]) btn.classList.add('disabled');
-          btn.onclick = () => toggleButton(btn, index);
-          groupContainers[col].appendChild(btn);
+    req.onsuccess = () => {
+      req.result.forEach(data => {
+        const blob = new Blob([data.blob], { type: 'audio/mp3' });
+        audios[data.index] = new Audio(URL.createObjectURL(blob));
+        fileNames[data.index] = data.name;
+        audios[data.index].addEventListener('loadedmetadata', calculateTotalTime);
+      });
+      createButtons();
+    };
+    req.onerror = () => console.error('Failed to load stored audios');
+  }
+
+  // Calculate total duration of all enabled tracks
+  function calculateTotalTime() {
+    totalPlaylistTime = 0;
+    audios.forEach((audio, index) => {
+      if (audio && enabled[index] && !isNaN(audio.duration)) {
+        totalPlaylistTime += audio.duration;
+      }
+    });
+    updateTotalTimeDisplay();
+  }
+
+  // Update total time display (decreasing during playback)
+  function updateTotalTimeDisplay() {
+    const remainingTime = Math.max(0, Math.round(totalPlaylistTime - elapsedTime));
+    totalTimeDisplay.textContent = `Total: ${remainingTime}s`;
+  }
+
+  // Update filename display
+  function updateFilenameDisplay() {
+    if (currentAudio && fileNames[currentIndex]) {
+      filenameDisplay.textContent = fileNames[currentIndex];
+    } else if (currentAudio) {
+      filenameDisplay.textContent = `Track ${currentIndex + 1}`;
+    } else {
+      filenameDisplay.textContent = 'No file playing';
+    }
+  }
+
+  // Start playback updates
+  function startPlaybackUpdates() {
+    elapsedTime = 0;
+    clearInterval(updateInterval);
+    updateInterval = setInterval(() => {
+      if (currentAudio && currentAudio.currentTime) {
+        elapsedTime += 0.2; // Update every 200ms
+        updateTotalTimeDisplay();
+      }
+    }, 200);
+  }
+
+  // Stop playback updates
+  function stopPlaybackUpdates() {
+    clearInterval(updateInterval);
+    updateTotalTimeDisplay();
+  }
+
+  // Modified file loader for A1, B1, C1, A2, B2, C2,... order
+  fileLoader.onchange = (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach((file, i) => {
+      const group = i % 3; // 0=A, 1=B, 2=C
+      const num = Math.floor(i / 3) + 1; // 1, 2, 3,...
+      const index = (num - 1) * 3 + group; // Calculate index (0-29)
+      
+      if (index >= 30) return;
+      audios[index] = new Audio(URL.createObjectURL(file));
+      fileNames[index] = file.name;
+      saveToIndexedDB(index, file);
+      audios[index].addEventListener('loadedmetadata', calculateTotalTime);
+    });
+    createButtons();
+  };
+
+  // Create buttons
+  function createButtons() {
+    groupA.innerHTML = '';
+    groupB.innerHTML = '';
+    groupC.innerHTML = '';
+    
+    for (let i = 0; i < 10; i++) {
+      createButton(groupA, 'A', i, i * 3);
+      createButton(groupB, 'B', i, i * 3 + 1);
+      createButton(groupC, 'C', i, i * 3 + 2);
+    }
+    calculateTotalTime();
+  }
+
+  function createButton(container, prefix, num, index) {
+    const btn = document.createElement('button');
+    btn.textContent = `${prefix}${num + 1}`;
+    btn.dataset.index = index;
+    btn.classList.add(`group-${prefix.toLowerCase()}`);
+    if (!enabled[index]) btn.classList.add('disabled');
+    btn.onclick = () => {
+      toggleButton(btn, index);
+      if (enabled[index] && audios[index]) {
+        if (currentAudio) currentAudio.pause();
+        currentAudio = audios[index];
+        currentIndex = index;
+        currentAudio.play();
+        startPlaybackUpdates();
+        updateFilenameDisplay();
+        currentAudio.addEventListener('ended', () => {
+          stopPlaybackUpdates();
+          calculateTotalTime();
         });
       }
-    }
+    };
+    
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'button-container';
+    buttonContainer.appendChild(btn);
+    container.appendChild(buttonContainer);
+  }
 
-    // Toggle button state
-    function toggleButton(btn, index) {
-      enabled[index] = !enabled[index];
-      localStorage.setItem('mp3_enabled', JSON.stringify(enabled));
-      btn.classList.toggle('disabled', !enabled[index]);
-    }
+  function toggleButton(btn, index) {
+    enabled[index] = !enabled[index];
+    localStorage.setItem('mp3_enabled', JSON.stringify(enabled));
+    btn.classList.toggle('disabled', !enabled[index]);
+    calculateTotalTime();
+  }
 
-    // Play audio
-    function playAudio(audio) {
-      return new Promise((resolve) => {
-        audio.currentTime = 0;
-        audio.play();
-        audio.onended = resolve;
-        audio.onpause = resolve;
-      });
-    }
+  function playAudio(audio, index) {
+    return new Promise((resolve) => {
+      if (currentAudio) currentAudio.pause();
+      currentAudio = audio;
+      currentIndex = index;
+      startPlaybackUpdates();
+      updateFilenameDisplay();
+      
+      audio.currentTime = 0;
+      audio.play().then(() => {
+        audio.onended = () => {
+          stopPlaybackUpdates();
+          calculateTotalTime();
+          resolve();
+        };
+        audio.onpause = () => {
+          stopPlaybackUpdates();
+          calculateTotalTime();
+          resolve();
+        };
+      }).catch(resolve);
+    });
+  }
 
-    // Play All button
-    async function playAll() {
-      if (playAllBtn.classList.contains('stopping')) {
-        stopFlag = true;
-        if (currentAudio) currentAudio.pause();
-        playAllBtn.textContent = 'Play All';
-        playAllBtn.classList.remove('stopping');
-        return;
-      }
-      stopFlag = false;
-      playAllBtn.textContent = 'Stop';
-      playAllBtn.classList.add('stopping');
-
-      for (let i = 0; i < audios.length; i++) {
-        currentIndex = i;
-        if (stopFlag) break;
-        if (enabled[i] && audios[i]) {
-          if (currentAudio) currentAudio.pause();
-          currentAudio = audios[i];
-          await playAudio(currentAudio);
-        }
-      }
+  async function playAll() {
+    if (playAllBtn.classList.contains('stopping')) {
+      stopFlag = true;
+      if (currentAudio) currentAudio.pause();
       playAllBtn.textContent = 'Play All';
       playAllBtn.classList.remove('stopping');
+      stopPlaybackUpdates();
+      calculateTotalTime();
+      return;
     }
 
-    // Forward button
-    forwardBtn.onclick = () => {
-      if (currentAudio) currentAudio.pause();
-      for (let i = currentIndex + 1; i < audios.length; i++) {
-        if (enabled[i] && audios[i]) {
-          audios[i].currentTime = 0;
-          audios[i].play();
-          currentAudio = audios[i];
-          currentIndex = i;
-          break;
-        }
+    stopFlag = false;
+    playAllBtn.textContent = 'Stop';
+    playAllBtn.classList.add('stopping');
+
+    for (let i = 0; i < audios.length; i++) {
+      currentIndex = i;
+      if (stopFlag) break;
+      if (enabled[i] && audios[i]) {
+        await playAudio(audios[i], i);
       }
-    };
+    }
 
-    // Home button - returns to index.html
-    homeBtn.onclick = () => {
-      window.location.href = 'index.html';
-    };
+    playAllBtn.textContent = 'Play All';
+    playAllBtn.classList.remove('stopping');
+    stopPlaybackUpdates();
+    calculateTotalTime();
+  }
 
-    playAllBtn.onclick = playAll;
+  playAllBtn.onclick = playAll;
 
-    // Prevent double-click zooming
-    document.addEventListener('dblclick', (e) => {
-      e.preventDefault();
-    });
+  function playNext(step) {
+    let i = currentIndex + step;
+    while (i >= 0 && i < audios.length) {
+      if (enabled[i] && audios[i]) {
+        currentIndex = i;
+        if (currentAudio) currentAudio.pause();
+        currentAudio = audios[i];
+        currentAudio.play();
+        startPlaybackUpdates();
+        updateFilenameDisplay();
+        currentAudio.addEventListener('ended', () => {
+          stopPlaybackUpdates();
+          calculateTotalTime();
+        });
+        break;
+      }
+      i += step;
+    }
+  }
 
-    // Finally, create the grid buttons.
-    createButtons();
-  </script>
+  forwardBtn.onclick = () => playNext(1);
+  
+  // Home button functionality
+  homeBtn.onclick = () => {
+    window.location.href = 'index.html';
+  };
+
+  function resetAll() {
+    if (confirm('Are you sure you want to delete all audio files and reset settings?')) {
+      localStorage.clear();
+      const req = indexedDB.deleteDatabase('AudioDB');
+      req.onsuccess = () => location.reload();
+      req.onerror = () => console.error('Failed to delete database');
+    }
+  }
+
+  // Initialize with silent audio
+  const silentBlob = new Blob([new Uint8Array(1)], { type: 'audio/mp3' });
+  for (let i = 0; i < 30; i++) {
+    if (!audios[i]) {
+      audios[i] = new Audio(URL.createObjectURL(silentBlob));
+    }
+  }
+
+  // Initial update
+  updateFilenameDisplay();
+  calculateTotalTime();
+</script>
 </body>
 </html>
