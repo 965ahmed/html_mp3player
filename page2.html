@@ -13,39 +13,39 @@
       font-family: sans-serif;
       display: flex;
       flex-direction: column;
-      background-color: #121212; /* Dark background */
-      color: white; /* Default text color */
-      overflow: hidden; /* Prevent scrolling */
+      background-color: #121212;
+      overflow: hidden;
     }
     h1 {
       text-align: center;
       margin: 10px 0;
-      font-size: 2em; /* Larger title */
+      font-size: 2em;
+      color: #ffffff;
     }
     #fileLoader {
       margin: 10px auto;
       display: block;
-      font-size: 1.5em; /* Larger file input */
+      font-size: 1.5em;
       padding: 10px;
       border-radius: 8px;
-      background-color: #333; /* Darker background for input */
-      color: white; /* White text */
+      background-color: #333;
+      color: #ffffff;
       cursor: pointer;
     }
     #main {
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr 2fr; /* Four columns: A, B, C, and controls */
+      grid-template-columns: 1fr 1fr 1fr 2fr;
       gap: 10px;
       padding: 10px;
       box-sizing: border-box;
-      height: calc(100vh - 60px); /* Leave room for header and fileLoader */
+      height: calc(100vh - 60px);
     }
 
     /* Button Groups */
     .button-group {
       display: grid;
-      grid-template-rows: repeat(10, 1fr); /* 10 rows per column */
+      grid-template-rows: repeat(10, 1fr);
       gap: 10px;
     }
 
@@ -53,28 +53,36 @@
     .button-group button {
       width: 100%;
       height: 100%;
-      font-size: 2.5em; /* Larger text */
-      padding: 0; /* Remove padding to maximize content space */
+      font-size: 2.5em;
+      padding: 0;
       border: none;
       border-radius: 8px;
-      color: white; /* White text */
-      background-color: transparent; /* Transparent background */
+      background-color: transparent;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
       position: relative;
       overflow: hidden;
       display: flex;
-      justify-content: center; /* Center horizontally */
-      align-items: center; /* Center vertically */
-      text-align: center; /* Ensure text is centered */
+      justify-content: center;
+      align-items: center;
+      text-align: center;
     }
 
-    /* Group Colors (Dark Shades) */
-    .group-a { background-color: #2e7d32; } /* Dark Green */
-    .group-b { background-color: #1565c0; } /* Dark Blue */
-    .group-c { background-color: #d84315; } /* Dark Orange */
+    /* Group Colors with Bright Text */
+    .group-a { 
+      background-color: #2e7d32;
+      color: #a5d6a7; /* Light green text */
+    }
+    .group-b { 
+      background-color: #1565c0;
+      color: #81d4fa; /* Light blue text */
+    }
+    .group-c { 
+      background-color: #d84315;
+      color: #ffab91; /* Light orange text */
+    }
     .disabled {
-      background-color: #444 !important; /* Dark gray for disabled buttons */
-      color: #888 !important; /* Light gray text for disabled buttons */
+      background-color: #444 !important;
+      color: #bdbdbd !important; /* Light gray text */
     }
 
     /* Right Sidebar Controls */
@@ -85,23 +93,31 @@
     }
     .right-controls button {
       height: 33%;
-      font-size: 2em; /* Larger text for control buttons */
+      font-size: 2em;
       border: none;
       border-radius: 8px;
-      padding: 0; /* Remove padding to maximize content space */
-      color: white; /* White text */
+      padding: 0;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
       position: relative;
       overflow: hidden;
       display: flex;
-      justify-content: center; /* Center horizontally */
-      align-items: center; /* Center vertically */
+      justify-content: center;
+      align-items: center;
     }
 
     /* Colors for Sidebar Buttons */
-    #playAll { background-color: #4527a0; } /* Dark Purple */
-    #forward { background-color: #00695c; } /* Dark Teal */
-    #backward { background-color: #ad1457; } /* Dark Pink */
+    #playAll { 
+      background-color: #4527a0;
+      color: #b39ddb; /* Light purple text */
+    }
+    #forward { 
+      background-color: #00695c;
+      color: #80cbc4; /* Light teal text */
+    }
+    #home { 
+      background-color: #5d4037; /* Brown background */
+      color: #d7ccc8; /* Light brown text */
+    }
   </style>
 </head>
 <body>
@@ -118,7 +134,7 @@
     <div class="right-controls">
       <button id="playAll">Play All</button>
       <button id="forward">Forward</button>
-      <button id="backward">Backward</button>
+      <button id="home">Home</button>
     </div>
   </div>
 
@@ -129,7 +145,7 @@
     const groupC = document.getElementById('groupC');
     const playAllBtn = document.getElementById('playAll');
     const forwardBtn = document.getElementById('forward');
-    const backwardBtn = document.getElementById('backward');
+    const homeBtn = document.getElementById('home');
 
     // An array for 30 audio objects (indices 0 to 29)
     const audios = Array(30).fill(null);
@@ -199,7 +215,7 @@
         groups.forEach((prefix, col) => {
           const index = i + col * 10;
           const btn = document.createElement('button');
-          btn.textContent = `${prefix}${i + 1}`; // Button text without icon
+          btn.textContent = `${prefix}${i + 1}`;
           btn.dataset.index = index;
           if (prefix === 'A') btn.classList.add('group-a');
           if (prefix === 'B') btn.classList.add('group-b');
@@ -268,18 +284,9 @@
       }
     };
 
-    // Backward button
-    backwardBtn.onclick = () => {
-      if (currentAudio) currentAudio.pause();
-      for (let i = currentIndex - 1; i >= 0; i--) {
-        if (enabled[i] && audios[i]) {
-          audios[i].currentTime = 0;
-          audios[i].play();
-          currentAudio = audios[i];
-          currentIndex = i;
-          break;
-        }
-      }
+    // Home button - returns to index.html
+    homeBtn.onclick = () => {
+      window.location.href = 'index.html';
     };
 
     playAllBtn.onclick = playAll;
