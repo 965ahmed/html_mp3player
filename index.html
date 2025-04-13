@@ -13,58 +13,125 @@
       font-family: sans-serif;
       display: flex;
       flex-direction: column;
-      background-color: #121212; /* Dark background */
-      color: white; /* Default text color */
-      overflow: hidden; /* Prevent scrolling */
+      background-color: #121212;
+      color: white;
+      overflow: auto; /* Allow scrolling if needed */
     }
     h1 {
       text-align: center;
-      margin-top: 20px;
-      font-size: 3em; /* Larger title */
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Add shadow for better visibility */
+      margin: 20px 0;
+      font-size: 2.5em;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
+    
+    /* Main Container */
     #main-container {
       flex: 1;
-      display: flex;
-      justify-content: center; /* Center horizontally */
-      align-items: center; /* Center vertically */
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      box-sizing: border-box;
     }
-    #open-subpage {
-      font-size: 2em; /* Large button text */
-      padding: 20px 40px;
+    
+    /* Subpage Buttons */
+    .subpage-btn {
+      font-size: 1.5em;
+      padding: 30px 20px;
       border: none;
       border-radius: 8px;
-      background-color: #673ab7; /* Deep purple */
-      color: white; /* White text */
+      background-color: #673ab7;
+      color: white;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
       cursor: pointer;
-      transition: background-color 0.3s ease; /* Smooth hover effect */
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 120px;
     }
-    #open-subpage:hover {
-      background-color: #512da8; /* Slightly darker purple on hover */
+    
+    .subpage-btn:hover {
+      background-color: #512da8;
+      transform: translateY(-3px);
     }
-    #open-subpage:active {
-      transform: scale(0.98); /* Slight shrink effect when clicked */
+    
+    .subpage-btn:active {
+      transform: scale(0.98);
+    }
+    
+    .subpage-btn small {
+      font-size: 0.7em;
+      opacity: 0.8;
+      margin-top: 8px;
+    }
+    
+    /* Different colors for different subpages */
+    .subpage-btn:nth-child(1) { background-color: #2e7d32; }
+    .subpage-btn:nth-child(2) { background-color: #1565c0; }
+    .subpage-btn:nth-child(3) { background-color: #d84315; }
+    .subpage-btn:nth-child(4) { background-color: #6a1b9a; }
+    .subpage-btn:nth-child(5) { background-color: #00838f; }
+    .subpage-btn:nth-child(6) { background-color: #ef6c00; }
+    .subpage-btn:nth-child(7) { background-color: #4e342e; }
+    .subpage-btn:nth-child(8) { background-color: #37474f; }
+    .subpage-btn:nth-child(9) { background-color: #5d4037; }
+    .subpage-btn:nth-child(10) { background-color: #4527a0; }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      #main-container {
+        grid-template-columns: 1fr;
+      }
+      .subpage-btn {
+        padding: 25px 15px;
+      }
     }
   </style>
 </head>
 <body>
   <!-- Main Title -->
-  <h1>Welcome to the MP3 Player App</h1>
+  <h1>MP3 Player Collection</h1>
 
-  <!-- Main Container -->
+  <!-- Main Container with Subpage Buttons -->
   <div id="main-container">
-    <!-- Button to Open Subpage -->
-    <button id="open-subpage">Open Subpage</button>
+    <!-- Subpage Buttons 1-10 -->
+    <button class="subpage-btn" onclick="window.location.href='subpage1.html'">
+      Subpage 1 <small>Basic Player</small>
+    </button>
+    <button class="subpage-btn" onclick="window.location.href='subpage2.html'">
+      Subpage 2 <small>Advanced Controls</small>
+    </button>
+    <button class="subpage-btn" onclick="window.location.href='subpage3.html'">
+      Subpage 3 <small>Playlist Manager</small>
+    </button>
+    <button class="subpage-btn" onclick="window.location.href='subpage4.html'">
+      Subpage 4 <small>Category A</small>
+    </button>
+    <button class="subpage-btn" onclick="window.location.href='subpage5.html'">
+      Subpage 5 <small>Category B</small>
+    </button>
+    <button class="subpage-btn" onclick="window.location.href='subpage6.html'">
+      Subpage 6 <small>Category C</small>
+    </button>
+    <button class="subpage-btn" onclick="window.location.href='subpage7.html'">
+      Subpage 7 <small>Special Effects</small>
+    </button>
+    <button class="subpage-btn" onclick="window.location.href='subpage8.html'">
+      Subpage 8 <small>Recordings</small>
+    </button>
+    <button class="subpage-btn" onclick="window.location.href='subpage9.html'">
+      Subpage 9 <small>Favorites</small>
+    </button>
+    <button class="subpage-btn" onclick="window.location.href='subpage10.html'">
+      Subpage 10 <small>Custom Mix</small>
+    </button>
   </div>
 
-  <!-- JavaScript to Handle Button Click -->
-  <script>
-    // Add an event listener to the button to open the subpage
-    document.getElementById('open-subpage').addEventListener('click', () => {
-      // Redirect to the subpage
-      window.location.href = 'subpage.html';
-    });
-  </script>
+  <!-- Optional Footer -->
+  <footer style="text-align: center; padding: 15px; font-size: 0.9em; opacity: 0.7;">
+    MP3 Player App © 2023 | Select a player above
+  </footer>
 </body>
 </html>
